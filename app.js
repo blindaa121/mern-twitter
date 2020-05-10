@@ -13,13 +13,13 @@ mongoose
 app.get("/", (req, res) => res.send("MERN Twitter"));
 app.listen(port, () => console.log(`Server is running on port ${port}`));
 
+//parse the JSON for the frontend
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 // users and tweets routes
 const users = require("./routes/api/users");
 const tweets = require("./routes/api/tweets");
 app.use("/api/users", users);
 app.use("/api/tweets", tweets);
-
-//parse the JSON for the frontend
-const bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
