@@ -4,7 +4,7 @@ const validText = require('./valid-text');
 module.exports = function validateLoginInput(data) {
     let errors = {};
 
-    data.email = validText(data.email) ? email : '';
+    data.email = validText(data.email) ? data.email : '';
     data.password = validText(data.password) ? data.password : '';
 
     if (!Validator.isEmail(data.email)) {
