@@ -2,16 +2,25 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const User = require('../../models/User');
+const jwt = require('jsonwebtoken');
+const keys = require('../../config/keys');
 
 router.get("/test", (req, res) => res.json({ msg: "This is the users route" }));
 
+// USER REGISTER FUNCTIONALITY
 router.post('/register', (req, res) => {
+    const { errors, isValid } = validateRegisterInput(req.body)
     // Check to make sure nobody has already registered with a duplicate email.
-    User.findOne({ email: req.body.email })
+    if (!isValid) {
+        return res.status(400).json(errors);
+    }
+
+    User.findOne({ handle: req.body.handle })
         .then(user => {
             if (user) {
                 //Throw a 400 error if the email address already exists
-            return res.status(400).json({ email: "A user has already registered with that email"})
+            errors.handle = "User already exists"
+            return res.status(400).json(errors);
             } else {
                 // Otherwise create a new user 
                 const newUser = new User({
@@ -24,16 +33,27 @@ router.post('/register', (req, res) => {
                     bcrypt.hash(newUser.password, salt, (err, hash) => {
                         if (err) throw err;
                         newUser.password = hash;
-                        newUser.save()
-                            .then(user => res.json(user))
-                            .catch(err => console.log(err))
-                    })
-                })
+                        newUser
+                            .save()
+                            .then(user => {
+                                const payload = { id: user.id, handle: user.handle };
+
+                                jwt.sign(payload, keys.secretOrKey, { expiresIn: 3600 }, (err, token) => {
+                                    res.json({
+                                        success: true,
+                                        token: "Bearer" + token
+                                    });
+                                });
+                            })
+                            .catch(err => console.log(err));
+                    });
+                });
             }
             
-        })
-})
+        });
+});
 
+// USER LOGIN FUNCTIONALITY
 router.post('/login', (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
@@ -47,7 +67,19 @@ router.post('/login', (req, res) => {
             bcrypt.compare(password, user.password)
                 .then(isMatch => {
                     if (isMatch) {
-                        res.json({ msg: 'Success' });
+                        const payload = { id: user.id, handle: user.handle }
+                        // res.json({ msg: 'Success' });
+                        jwt.sign(
+                            payload,
+                            keys.secretOrKey,
+                            // Tell the key to expire in one hour
+                            { expiresIn: 3600 },
+                            (err, token) => {
+                                res.json({
+                                    success: true,
+                                    token: 'Bearer ' + token
+                                });
+                            });
                     } else {
                         return res.status(400).json({ password: 'Incorrect Password' });
                     }
