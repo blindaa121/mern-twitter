@@ -1,0 +1,40 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Arimo', sans-serif;
+    color: white;
+    background-color: #457b9d;
+    border-bottom: 1px solid black;
+}
+
+.navlinks {
+    display: flex;
+    padding-right: 50px;
+    width: 400px;
+    justify-content: space-between;
+    
+}
+
+.navlinks > a {
+    text-decoration: none;
+    color: white;
+}
+
+.navlinks-loggedout {
+    display: flex;
+    padding-right: 50px;
+    width: 120px;
+    justify-content: space-between;
+}
+
+.navlinks-loggedout > a {
+    text-decoration: none;
+    color: white;
+}
+
+.navbar > h1 {
+    font-family: 'Lobster', cursive;
+    padding-left: 50px;
+}
+
